@@ -1,26 +1,25 @@
-package com.ecommerce.inventoryservice.listener;
+package com.ecommerce.notificationservice.listener;
 
-import com.ecommerce.inventoryservice.event.OrderPlacedEvent;
-import com.ecommerce.inventoryservice.service.InventoryService;
-import lombok.RequiredArgsConstructor;
+
+import com.ecommerce.notificationservice.event.OrderPlacedEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
 @Slf4j
-@RequiredArgsConstructor
 @Component
 public class OrderEventListener {
-    private final InventoryService inventoryService;
 
-    @RabbitListener(queues = "inventory-queue")
+
+    @RabbitListener(queues = "notification-queue")
     public void handleOrderPlacedEvent(OrderPlacedEvent event) {
         event.items().forEach(item -> {
             try {
-                inventoryService.reduceStock(item.sku(), item.quantity());
-                log.info("Stock reduced for SKU: {}, Quantity: {}", item.sku(), item.quantity());
+                log.info("Sending email notification to email:{}", event.email());
+
+                log.info("Email sent successfully for order:{}", event.orderNumber());
             } catch (Exception e) {
-                log.error("Error occurred while reducing stock for SKU: {}, Error: {}", item.sku(), e.getMessage());
+                log.error("Error occurred while sending email notification: {}", e.getMessage());
             }
         });
     }

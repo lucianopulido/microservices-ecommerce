@@ -100,7 +100,7 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Override
     @Transactional
-    public void reduceInventory(String sku, Integer quantity) {
+    public void reduceStock(String sku, Integer quantity) {
         Inventory inventory = inventoryRepository.findBySku(sku)
                 .orElseThrow(() -> new ResourceNotFoundException("Inventario", "sku", sku));
 

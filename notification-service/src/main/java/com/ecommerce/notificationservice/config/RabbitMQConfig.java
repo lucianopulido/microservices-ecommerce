@@ -1,4 +1,4 @@
-package com.ecommerce.inventoryservice.config;
+package com.ecommerce.notificationservice.config;
 
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
@@ -20,8 +20,8 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Queue inventoryQueue() {
-        return new Queue("inventory-queue", true);
+    public Queue notificationQueue() {
+        return new Queue("notification-queue", true);
     }
 
     @Bean
@@ -30,7 +30,7 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Binding binding(Queue inventoryQueue, TopicExchange orderEventsExchange) {
-        return BindingBuilder.bind(inventoryQueue).to(orderEventsExchange).with("order.placed");
+    public Binding binding(Queue notificationQueue, TopicExchange orderEventsExchange) {
+        return BindingBuilder.bind(notificationQueue).to(orderEventsExchange).with("order.placed");
     }
 }

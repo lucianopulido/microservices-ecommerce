@@ -57,7 +57,7 @@ public class InventoryController {
     @PutMapping("/reduce/{sku}")
     @ResponseStatus(HttpStatus.OK)
     public String reduceInventory(@PathVariable String sku, @RequestParam Integer quantity) {
-        this.inventoryService.reduceInventory(sku, quantity);
+        this.inventoryService.reduceStock(sku, quantity);
         return "Inventario reducido exitosamente";
     }
 }
