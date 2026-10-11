@@ -1,5 +1,6 @@
 package com.ecommerce.orderservice.dto;
 
+import com.ecommerce.orderservice.model.OrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,5 +15,6 @@ public class OrderResponse {
     private Long id;
     private String orderNumber;
     private String userId;
+    private OrderStatus status;
     private List<OrderLineItemsRequest> orderLineItemsList;
 }

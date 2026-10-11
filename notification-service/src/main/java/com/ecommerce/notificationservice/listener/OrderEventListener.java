@@ -19,7 +19,6 @@ public class OrderEventListener {
 
     @RabbitListener(queues = "notification-queue")
     public void handleOrderPlacedEvent(OrderPlacedEvent event) {
-        log.info("Procesando evento para orden {}. Usuario SMTP: {}", event.orderNumber(), env.getProperty("spring.mail.username"));
         try {
                 SimpleMailMessage message = new SimpleMailMessage();
                 message.setFrom("pedidos@ecommerce.com");

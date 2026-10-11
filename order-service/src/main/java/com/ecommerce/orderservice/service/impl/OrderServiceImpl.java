@@ -7,7 +7,7 @@ import com.ecommerce.orderservice.event.OrderPlacedEvent;
 import com.ecommerce.orderservice.exception.ResourceNotFoundException;
 import com.ecommerce.orderservice.mapper.OrderMapper;
 import com.ecommerce.orderservice.model.Order;
-import com.ecommerce.orderservice.model.OrderLineItems;
+import com.ecommerce.orderservice.model.OrderStatus;
 import com.ecommerce.orderservice.repository.OrderRepository;
 import com.ecommerce.orderservice.service.OrderService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
@@ -47,24 +47,14 @@ public class OrderServiceImpl implements OrderService {
         }
 
         log.info("Colocando nueva orden...");
-
-        List<OrderLineItems> orderLineItems = orderRequest.getOrderLineItemsList()
-                .stream()
-                .map(item -> {
-                    String sku = item.getSku();
-                    Integer quantity = item.getQuantity();
-                    return orderMapper.toOrderLineItems(item);
-                }).toList();
-
-
-        Order order = new Order();
-        order.setOrderNumber(UUID.randomUUID().toString());
+        Order order = orderMapper.toOrder(orderRequest);
         order.setUserId(userId);
-        order.setOrderLineItemsList(orderLineItems);
+        order.setOrderNumber(UUID.randomUUID().toString());
+
+        order.setStatus(OrderStatus.PLACED);
 
         Order savedOrder = orderRepository.save(order);
         log.info("Orden guardada con éxito. ID: {}", savedOrder.getId());
-
 
         List<OrderPlacedEvent.OrderItemEvent> orderItems = order.getOrderLineItemsList()
                 .stream()
@@ -72,8 +62,11 @@ public class OrderServiceImpl implements OrderService {
                 .toList();
 
         OrderPlacedEvent event = new OrderPlacedEvent(savedOrder.getOrderNumber(), orderRequest.getEmail(), orderItems);
+
         rabbitTemplate.convertAndSend("order-events", "order.placed", event);
+
         log.info("Evento enviado a RabbitMQ para la orden: {}", savedOrder.getOrderNumber());
+
         return orderMapper.toOrderResponse(savedOrder);
 
     }
