@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitMQConfig {
 
     public static final String EXCHANGE_NAME = "order-events";
+    public static final String QUEUE_NAME = "inventory-queue";
 
     @Bean
     public MessageConverter jsonMessageConverter() {
@@ -21,7 +22,7 @@ public class RabbitMQConfig {
 
     @Bean
     public Queue inventoryQueue() {
-        return new Queue("inventory-queue", true);
+        return new Queue(QUEUE_NAME, true);
     }
 
     @Bean

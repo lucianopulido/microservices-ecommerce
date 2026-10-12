@@ -115,6 +115,18 @@ public class OrderServiceImpl implements OrderService {
         log.info("Orden eliminada. ID: {}", id);
     }
 
+    @Override
+    @Transactional
+    public void updateOrderStatus(String orderNumber, OrderStatus status) {
+        log.info("Actualizando estado de la orden. Orden: {}, Nuevo estado: {}", orderNumber, status);
+        orderRepository.findByOrderNumber(orderNumber).ifPresentOrElse(order -> {
+                    order.setStatus(status);
+                    orderRepository.save(order);
+                    log.info("Estado de la orden actualizado con éxito. Orden: {}", orderNumber);
+                },
+                () -> {log.error("Orden no encontrada. Orden: {}", orderNumber);});
+    }
+
     public OrderResponse handleInventoryServiceFailure(OrderRequest orderRequest, String userId, Throwable throwable) {
         log.error("Circuit Breaker Activado. Fallo en el servicio de inventario. Causa: {}", throwable.getMessage());
         throw new RuntimeException("El servicio de inventario no está disponible. Por favor, inténtelo más tarde.");
