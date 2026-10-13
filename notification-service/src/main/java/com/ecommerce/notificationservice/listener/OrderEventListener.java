@@ -1,6 +1,7 @@
 package com.ecommerce.notificationservice.listener;
 
 
+import com.ecommerce.notificationservice.event.OrderCancelledEvent;
 import com.ecommerce.notificationservice.event.OrderConfirmedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,26 @@ public class OrderEventListener {
             message.setText("Hola!\n"
                     + "Tu pedido con numero: " + event.orderNumber() + " ha sido recibido exitosamente.\n" +
                     "Gracias por comprar con nosotros!");
+            mailSender.send(message);
+            log.info("Sending email notification to email:{}", event.email());
+
+            log.info("Email sent successfully for order:{}", event.orderNumber());
+        } catch (Exception e) {
+            log.error("Error occurred while sending email notification: {}", e.getMessage());
+        }
+    }
+
+    @RabbitListener(queues = "notification-queue")
+    public void handleOrderCancelledEvent(OrderCancelledEvent event) {
+        log.info("Received OrderCancelledEvent for order:{}", event.orderNumber());
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom("pedidos@ecommerce.com");
+            message.setTo(event.email());
+            message.setSubject("Order Cancelada - " + event.orderNumber());
+            message.setText("Hola!\n"
+                    + "Tu pedido con numero: " + event.orderNumber() + " ha sido cancelado.\n" +
+                    "Lo sentimos por las molestias.");
             mailSender.send(message);
             log.info("Sending email notification to email:{}", event.email());
 
