@@ -10,6 +10,7 @@ import com.ecommerce.orderservice.model.Order;
 import com.ecommerce.orderservice.model.OrderStatus;
 import com.ecommerce.orderservice.repository.OrderRepository;
 import com.ecommerce.orderservice.service.OrderService;
+import com.ecommerce.orderservice.service.OutboxService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
     private final RabbitTemplate rabbitTemplate;
+    private final OutboxService outboxService;
 
     @Value("${order.enabled}")
     private boolean orderEnabled;
@@ -53,7 +55,7 @@ public class OrderServiceImpl implements OrderService {
 
         order.setStatus(OrderStatus.PLACED);
 
-        Order savedOrder = orderRepository.save(order);
+        Order savedOrder = this.orderRepository.save(order);
         log.info("Orden guardada con éxito. ID: {}", savedOrder.getId());
 
         List<OrderPlacedEvent.OrderItemEvent> orderItems = order.getOrderLineItemsList()
@@ -63,8 +65,18 @@ public class OrderServiceImpl implements OrderService {
 
         OrderPlacedEvent event = new OrderPlacedEvent(savedOrder.getOrderNumber(), orderRequest.getEmail(), orderItems);
 
-        rabbitTemplate.convertAndSend("order-events", "order.placed", event);
+        boolean sentToRabbitMQ = false;
 
+        try {
+            this.rabbitTemplate.convertAndSend("order-events", "order.placed", event);
+            sentToRabbitMQ = true;
+            log.info("Sent order placed event to RabbitMQ for order: {}", savedOrder.getOrderNumber());
+            ;
+        } catch (Exception e) {
+            log.error("Error al enviar el evento a RabbitMQ: {}", e.getMessage());
+        }
+
+        this.outboxService.saveOrderPlacedEvent(event, sentToRabbitMQ);
         log.info("Evento enviado a RabbitMQ para la orden: {}", savedOrder.getOrderNumber());
 
         return orderMapper.toOrderResponse(savedOrder);
@@ -124,7 +136,9 @@ public class OrderServiceImpl implements OrderService {
                     orderRepository.save(order);
                     log.info("Estado de la orden actualizado con éxito. Orden: {}", orderNumber);
                 },
-                () -> {log.error("Orden no encontrada. Orden: {}", orderNumber);});
+                () -> {
+                    log.error("Orden no encontrada. Orden: {}", orderNumber);
+                });
     }
 
     public OrderResponse handleInventoryServiceFailure(OrderRequest orderRequest, String userId, Throwable throwable) {

@@ -3,6 +3,7 @@ package com.ecommerce.inventoryservice.listener;
 import com.ecommerce.inventoryservice.event.OrderPlacedEvent;
 import com.ecommerce.inventoryservice.service.InventoryService;
 import com.ecommerce.notificationservice.event.OrderCancelledEvent;
+import com.ecommerce.notificationservice.event.OrderConfirmedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -28,7 +29,8 @@ public class OrderEventListener {
             }
 
             event.items().forEach(item -> inventoryService.reduceStock(item.sku(), item.quantity()));
-            rabbitTemplate.convertAndSend("order-events", "order.confirmed", event);
+            OrderConfirmedEvent orderConfirmedEvent = new OrderConfirmedEvent(event.orderNumber(), event.email());
+            rabbitTemplate.convertAndSend("order-events", "order.confirmed", orderConfirmedEvent);
 
             log.info("Stock reduced for order: {}", event.orderNumber());
         } catch (Exception e) {

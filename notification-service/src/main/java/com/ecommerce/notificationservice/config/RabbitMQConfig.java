@@ -22,7 +22,7 @@ public class RabbitMQConfig {
     public static final String DEAD_LETTER_HEADER_EXCHANGE = "x-dead-letter-exchange";
     public static final String DEAD_LETTER_HEADER_ROUTING_KEY = "x-dead-letter-routing-key";
     public static final String DEAD_LETTER_ROUTING_KEY = "notification.dead";
-    public static final String INVENTORY_ORDER_PLACED_EVENT_TYPE = "com.ecommerce.inventoryservice.event.OrderPlacedEvent";
+    public static final String INVENTORY_ORDER_PLACED_EVENT_TYPE = "com.ecommerce.inventoryservice.event.OrderConfirmedEvent";
     public static final String INVENTORY_ORDER_CANCELLED_EVENT_TYPE = "com.ecommerce.inventoryservice.event.OrderCancelledEvent";
 
 
