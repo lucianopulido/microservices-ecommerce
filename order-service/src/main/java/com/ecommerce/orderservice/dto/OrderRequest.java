@@ -15,8 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 public class OrderRequest {
     @NotEmpty(message = "La orden debe contener al menos un item")
-    @Valid
-    private List<OrderLineItemsRequest> orderLineItemsList;
+    private List<@Valid OrderLineItemsRequest> orderLineItemsList;
 
     @NotBlank
     @Email(message = "El formato del correo electrónico no es válido")
