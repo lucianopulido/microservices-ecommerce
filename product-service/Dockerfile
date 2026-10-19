@@ -1,12 +1,16 @@
-# ETAPA 1: BUILD (Construcción del jar ejecutable application)
-FROM maven:3.9.6-eclipse-temurin-21 AS builder
+# ---- ETAPA 1: CONSTRUCCIÓN ----
+FROM eclipse-temurin:21-jdk-alpine AS builder
 WORKDIR /app
-COPY . .
-RUN mvn clean package -DskipTests
+COPY pom.xml .
+COPY mvnw .
+COPY .mvn .mvn
+RUN ./mvnw dependency:go-offline -B
+COPY src ./src
+RUN ./mvnw package -DskipTests
 
-# ETAPA 2: RUNTIME (El producto final)
-FROM eclipse-temurin:21-jre-alpine
+# ---- ETAPA 2: EJECUCIÓN ----
+FROM eclipse-temurin:21-jdk-alpine
 WORKDIR /app
-COPY --from=builder /app/target/*.jar product.jar
-EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "product.jar"]
+COPY --from=builder /app/target/*.jar app.jar
+EXPOSE 8081
+ENTRYPOINT ["java", "-jar", "app.jar"]
