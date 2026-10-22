@@ -27,6 +27,8 @@ spec:
               value: "false"
             - name: EUREKA_CLIENT_ENABLED
               value: "false"
+            - name: APP_MAINTENANCE_MESSAGE
+              value: "Sistema operativo - version 2.0"
             - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI
               value: "http://keycloak:8080/realms/ecommerce-realm"
             - name: SPRING_DATA_MONGODB_HOST

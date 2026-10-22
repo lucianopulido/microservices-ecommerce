@@ -27,6 +27,8 @@ spec:
               value: "false"
             - name: EUREKA_CLIENT_ENABLED
               value: "false"
+            - name: ORDER_ENABLED
+              value: "true"
             - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI
               value: "http://keycloak:8080/realms/ecommerce-realm"
             - name: MANAGEMENT_OPENTELEMETRY_TRACING_EXPORT_OTLP_ENDPOINT
